@@ -3,6 +3,8 @@ package team;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+
+import javax.print.attribute.standard.JobName;
 import javax.swing.*;
 
 class MovieModel {
@@ -41,12 +43,10 @@ class teamMovieView extends JFrame {
 	JComboBox<String> combR = new JComboBox<String>(); // 등급 Rating
 	JComboBox<String> combC = new JComboBox<String>(); // 나라 Country
 
-	JButton[] button = new JButton[3];
+	JButton[] button = new JButton[5];
 
 	JTextArea ta = new JTextArea(10, 54);
 	// 10, 54
-
-	JButton seb = new JButton("검색");
 
 	public teamMovieView() {
 
@@ -70,17 +70,17 @@ class teamMovieView extends JFrame {
 		String[] combRName = { "전체", "12세 관람가", "15세 관람가", "19세 관람가" }; // 등급 리스트 배열.
 		String[] combCName = { "전체", "국내", "동양", "서양" }; // 나라 리스트 배열.
 
-		String[] bName = { "삽입", "수정", "삭제" };
+		String[] bName = { "삽입", "수정", "삭제", "초기화", "영화 검색"};
 
 		for (int i = 0; i < tf.length; i++) {
 			tf[i] = new JTextField(30);
 		}
 
-		for (int i = 0; i < tName.length; i++) {
+		for (int i = 0; i < bName.length; i++) {
 			button[i] = new JButton(bName[i]);
 		}
 
-		for (int i = 0; i < combRName.length; i++) {
+		for (int i = 0; i < combRName.length - 1; i++) {
 			combR.addItem(combRName[i]);
 		}
 
@@ -152,6 +152,7 @@ class teamMovieView extends JFrame {
 		p3.add(button[0]); // 삽입
 		p3.add(button[1]); // 수정
 		p3.add(button[2]); // 삭제
+		p3.add(button[3]); // 초기화.
 
 		// TextArea가 추가될 패널.
 		pp2 = new JPanel();
@@ -163,7 +164,7 @@ class teamMovieView extends JFrame {
 		pp3 = new JPanel();
 		pp3.setLayout(new BorderLayout());
 
-		pp3.add(seb);
+		pp3.add(button[4]);
 
 		pp1.add(p1, BorderLayout.NORTH);
 		pp1.add(p2, BorderLayout.CENTER);
@@ -231,7 +232,8 @@ public class teamMovie {
 				v.button[i].addActionListener(handler);
 			}
 		}
-		v.seb.addActionListener(handler);
+		v.button[3].addActionListener(handler);
+		v.button[4].addActionListener(handler);
 		v.addWindowListener(new WindowHandler());
 	}
 
@@ -290,13 +292,23 @@ public class teamMovie {
 				v.tf[0].requestFocus();
 			} else if (e.getSource() == v.tf[0]) {
 				v.tf[1].requestFocus();
-			} else if (e.getSource() == v.button[0]) {
+			} else if (e.getSource() == v.button[0]) { // 삽입.
 				addMovie();
-			} else if (e.getSource() == v.button[1]) {
+			} else if (e.getSource() == v.button[1]) { // 수정.
 				updateMovie();
-			} else if (e.getSource() == v.button[2]) {
+			} else if (e.getSource() == v.button[2]) { // 삭제.
 				deleteMovie();
-			} else if (e.getSource() == v.seb) {
+			} else if (e.getSource() == v.button[3]) { // 초기화.
+				v.ttf.setText("");
+				for (int i = 0; i < v.tf.length; i++) {
+					v.tf[i].setText("");
+				}
+				v.combG.setSelectedIndex(0);
+				v.combT.setSelectedIndex(0);
+				v.combR.setSelectedIndex(0);
+				v.combC.setSelectedIndex(0);
+				getMovie();
+			} else if (e.getSource() == v.button[4]) {
 				searchView();
 			} else if (e.getSource() == search.btn) {
 				searchMovie();
