@@ -3,8 +3,6 @@ package team;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
-
-import javax.print.attribute.standard.JobName;
 import javax.swing.*;
 
 class MovieModel {
@@ -103,15 +101,18 @@ class teamMovieView extends JFrame {
 
 	void setComponents() { // 패널 내부 설정들.
 
+		// Label 내부 설정.
 		for (int i = 0; i < label.length; i++) {
 			label[i].setHorizontalAlignment(JLabel.CENTER);
 		}
 		
 		ttf.setBackground(Color.YELLOW);
 		
+		// TextArea 내부 설정.
+		ta.setEditable(false);
 	}
 
-	void addComponents() { // 내부설정패널을 외부 패널에 붙임.
+	void addComponents() { // 기능들을 패널에 붙임.
 		
 		pp1 = new JPanel();
 		pp1.setLayout(new BorderLayout());
@@ -184,10 +185,11 @@ class searchView extends JFrame {
 	JComboBox<String> combmovie;
 	String[] movie = { "제목", "감독", "장르", "시간", "주연", "등급", "나라" };
 	JTextField tf;
-	JButton btn = new JButton("검색");
+	JButton btn[] = new JButton[2];
+	String[] btnString = {"검색", "취소"};
 
 	public searchView() {
-		setTitle("검색");
+		setTitle("영화 검색");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(300, 100);
 
@@ -202,7 +204,12 @@ class searchView extends JFrame {
 		p1.add(tf);
 
 		p2 = new JPanel(new FlowLayout()); // 검색 btn.
-		p2.add(btn);
+		
+		for (int i = 0; i < btn.length; i++) {
+			btn[i] = new JButton(btnString[i]);
+			p2.add(btn[i]);
+		}
+		
 
 		c.add(p1, BorderLayout.NORTH);
 		c.add(p2, BorderLayout.SOUTH);
@@ -235,6 +242,7 @@ public class teamMovie {
 		v.button[3].addActionListener(handler);
 		v.button[4].addActionListener(handler);
 		v.addWindowListener(new WindowHandler());
+		disableButtons();
 	}
 
 	void viewToModel() {
@@ -290,6 +298,9 @@ public class teamMovie {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == v.ttf) {
 				v.tf[0].requestFocus();
+				for (int i = 0; i < 3; i++) {
+					v.button[i].setEnabled(true);
+				}
 			} else if (e.getSource() == v.tf[0]) {
 				v.tf[1].requestFocus();
 			} else if (e.getSource() == v.button[0]) { // 삽입.
@@ -310,8 +321,10 @@ public class teamMovie {
 				getMovie();
 			} else if (e.getSource() == v.button[4]) {
 				searchView();
-			} else if (e.getSource() == search.btn) {
+			} else if (e.getSource() == search.btn[0]) {
 				searchMovie();
+			} else if (e.getSource() == search.btn[1]) {
+				search.setVisible(false);
 			}
 		}
 
@@ -345,7 +358,9 @@ public class teamMovie {
 
 	public void searchView() {
 		search = new searchView();
-		search.btn.addActionListener(handler);
+		for (int i = 0; i < search.btn.length; i++) {
+			search.btn[i].addActionListener(handler);
+		}
 	}
 
 	public void searchMovie() {
@@ -366,6 +381,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -380,6 +396,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -394,6 +411,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -408,6 +426,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -422,6 +441,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -436,6 +456,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -450,6 +471,7 @@ public class teamMovie {
 							rs.getString("country"));
 					addTextArea();
 				}
+				
 				search.setVisible(false);
 				break;
 
@@ -533,6 +555,12 @@ public class teamMovie {
 			e.getStackTrace();
 		}
 		return con;
+	}
+	
+	public void disableButtons() {
+		v.button[0].setEnabled(false);
+		v.button[1].setEnabled(false);
+		v.button[2].setEnabled(false);
 	}
 
 	public void disConnection() {
