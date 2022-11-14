@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
 import javax.swing.*;
+import javax.swing.table.*;
+
+import com.mysql.cj.xdevapi.Table;
 
 class MovieModel {
 	String title;
@@ -43,13 +46,15 @@ class teamMovieView extends JFrame {
 
 	JButton[] button = new JButton[5];
 
-	JTextArea ta = new JTextArea(10, 54);
-	// 10, 54
+	String colName[] = { "제목", "감독", "장르", "시간", "주언", "등급", "나라" };
+	DefaultTableModel model = new DefaultTableModel(colName, 0);
+	JTable table = new JTable(model);
+	DefaultTableCellRenderer ca = new DefaultTableCellRenderer();
 
 	public teamMovieView() {
 
 		setTitle("영화 ");
-		setSize(570, 350);
+		setSize(615, 350);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		newComponents();
@@ -68,7 +73,7 @@ class teamMovieView extends JFrame {
 		String[] combRName = { "전체", "12세 관람가", "15세 관람가", "19세 관람가" }; // 등급 리스트 배열.
 		String[] combCName = { "전체", "국내", "동양", "서양" }; // 나라 리스트 배열.
 
-		String[] bName = { "삽입", "수정", "삭제", "초기화", "영화 검색"};
+		String[] bName = { "삽입", "수정", "삭제", "초기화", "영화 검색" };
 
 		for (int i = 0; i < tf.length; i++) {
 			tf[i] = new JTextField(30);
@@ -105,15 +110,13 @@ class teamMovieView extends JFrame {
 		for (int i = 0; i < label.length; i++) {
 			label[i].setHorizontalAlignment(JLabel.CENTER);
 		}
-		
+
 		ttf.setBackground(Color.YELLOW);
-		
-		// TextArea 내부 설정.
-		ta.setEditable(false);
+
 	}
 
 	void addComponents() { // 기능들을 패널에 붙임.
-		
+
 		pp1 = new JPanel();
 		pp1.setLayout(new BorderLayout());
 
@@ -126,7 +129,7 @@ class teamMovieView extends JFrame {
 
 		// tf들, list들이 있는 패널. (pp1의 중앙 배치.)
 		p2 = new JPanel();
-		p2.setLayout(new GridLayout(2, 3));
+		p2.setLayout(new GridLayout(2, 3, 10, 5));
 
 		p2.add(label[0]); // 감독
 		p2.add(tf[0]); // ㄴ tf
@@ -155,11 +158,33 @@ class teamMovieView extends JFrame {
 		p3.add(button[2]); // 삭제
 		p3.add(button[3]); // 초기화.
 
-		// TextArea가 추가될 패널.
+		// Table가 추가될 패널.
 		pp2 = new JPanel();
 		pp2.setLayout(new FlowLayout());
+		pp2.add(new JScrollPane(table));
 
-		pp2.add(new JScrollPane(ta));
+		table.setPreferredScrollableViewportSize(new Dimension(580, 133));
+		table.getTableHeader().setReorderingAllowed(false);
+		
+		table.getColumnModel().getColumn(0).setPreferredWidth(70);
+		table.getColumnModel().getColumn(1).setPreferredWidth(70);
+		table.getColumnModel().getColumn(2).setPreferredWidth(50);
+		table.getColumnModel().getColumn(3).setPreferredWidth(60);
+		table.getColumnModel().getColumn(4).setPreferredWidth(70);
+		table.getColumnModel().getColumn(5).setPreferredWidth(50);
+		table.getColumnModel().getColumn(6).setPreferredWidth(10);
+
+		ca.setHorizontalAlignment(SwingConstants.CENTER); // 렌더러의 가로정렬을 CENTER로
+
+		TableColumnModel tcm = table.getColumnModel(); // 정렬할 테이블의 컬럼모델을 가져옴
+
+		tcm.getColumn(0).setCellRenderer(ca);
+		tcm.getColumn(1).setCellRenderer(ca);
+		tcm.getColumn(2).setCellRenderer(ca);
+		tcm.getColumn(3).setCellRenderer(ca);
+		tcm.getColumn(4).setCellRenderer(ca);
+		tcm.getColumn(5).setCellRenderer(ca);
+		tcm.getColumn(6).setCellRenderer(ca);
 
 		// 검색 btn이 추가될 패널.
 		pp3 = new JPanel();
@@ -186,7 +211,7 @@ class searchView extends JFrame {
 	String[] movie = { "제목", "감독", "장르", "시간", "주연", "등급", "나라" };
 	JTextField tf;
 	JButton btn[] = new JButton[2];
-	String[] btnString = {"검색", "취소"};
+	String[] btnString = { "검색", "취소" };
 
 	public searchView() {
 		setTitle("영화 검색");
@@ -204,12 +229,11 @@ class searchView extends JFrame {
 		p1.add(tf);
 
 		p2 = new JPanel(new FlowLayout()); // 검색 btn.
-		
+
 		for (int i = 0; i < btn.length; i++) {
 			btn[i] = new JButton(btnString[i]);
 			p2.add(btn[i]);
 		}
-		
 
 		c.add(p1, BorderLayout.NORTH);
 		c.add(p2, BorderLayout.SOUTH);
@@ -222,6 +246,7 @@ public class teamMovie {
 	MovieModel m;
 	teamMovieView v;
 	searchView search;
+
 	MovieHandler handler = new MovieHandler();
 
 	Connection con = null;
@@ -241,8 +266,8 @@ public class teamMovie {
 		}
 		v.button[3].addActionListener(handler);
 		v.button[4].addActionListener(handler);
+		v.table.addMouseListener(new MouseHandler());
 		v.addWindowListener(new WindowHandler());
-		disableButtons();
 	}
 
 	void viewToModel() {
@@ -251,45 +276,30 @@ public class teamMovie {
 				v.combC.getSelectedItem().toString());
 	}
 
-	// 전각문자 개수를 세주는 메서드.
-	private static int getKorCnt(String kor) {
-		int cnt = 0;
-		for (int i = 0; i < kor.length(); i++) {
-			if (kor.charAt(i) >= '가' && kor.charAt(i) <= '힣') {
-				cnt++;
-			}
+	class MouseHandler extends MouseAdapter {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			int row = v.table.getSelectedRow();
+
+			TableModel data = v.table.getModel();
+
+			String movieTitle = (String) data.getValueAt(row, 0);
+			String movieDirector = (String) data.getValueAt(row, 1);
+			String movieGenre = (String) data.getValueAt(row, 2);
+			String movieTime = (String) data.getValueAt(row, 3);
+			String movieActor = (String) data.getValueAt(row, 4);
+			String movieRating = (String) data.getValueAt(row, 5);
+			String movieCountry = (String) data.getValueAt(row, 6);
+
+			v.ttf.setText(movieTitle);
+			v.tf[0].setText(movieDirector);
+			v.tf[1].setText(movieActor);
+			v.combG.setSelectedItem(movieGenre);
+			v.combT.setSelectedItem(movieTime);
+			v.combR.setSelectedItem(movieRating);
+			v.combC.setSelectedItem(movieCountry);
 		}
-		return cnt;
-	}
-
-	// 전각문자의 개수만큼 문자열 길이를 빼주는 메서드.
-	public static String convert(String word, int size) {
-		String formatter = String.format("%%%ds", size - getKorCnt(word));
-		return String.format(formatter, word);
-	}
-
-	void addTextArea() {
-		String s;
-		
-		s = "  |";
-		s += convert(m.title, 13);
-		s += "\t|";
-		s += convert(m.director, 13);
-		s += "\t|";
-		s += convert(m.genre, 13);
-		s += "\t|";
-		s += convert(m.time, 13);
-		s += "\t|";
-		s += convert(m.actor, 13);
-		s += "\t|";
-		s += convert(m.rating, 14);
-		s += "\t|";
-		s += convert(m.country, 4);
-		s += "|    \n";
-		
-		
-		System.out.println(s);
-		v.ta.append(s);
 	}
 
 	class MovieHandler implements ActionListener {
@@ -311,9 +321,9 @@ public class teamMovie {
 				deleteMovie();
 			} else if (e.getSource() == v.button[3]) { // 초기화.
 				v.ttf.setText("");
-				for (int i = 0; i < v.tf.length; i++) {
-					v.tf[i].setText("");
-				}
+				v.tf[0].setText("");
+				v.tf[1].setText("");
+				v.model.setNumRows(0);
 				v.combG.setSelectedIndex(0);
 				v.combT.setSelectedIndex(0);
 				v.combR.setSelectedIndex(0);
@@ -340,15 +350,13 @@ public class teamMovie {
 		makeConnection();
 		String sql = "";
 		sql = "SELECT * FROM movie";
-		v.ta.setText("");
 
 		try {
 			rs = stmt.executeQuery(sql);
 
 			while (rs.next()) {
-				m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-						rs.getString("time"), rs.getString("actor"), rs.getString("rating"), rs.getString("country"));
-				addTextArea();
+				v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"), rs.getString("genre"),
+						rs.getString("time"), rs.getString("actor"), rs.getString("rating"), rs.getString("country") });
 			}
 		} catch (SQLException sqle) {
 			System.out.println("getData: SQL Error");
@@ -365,7 +373,6 @@ public class teamMovie {
 
 	public void searchMovie() {
 		makeConnection();
-		v.ta.setText("");
 		String sql = "SELECT * FROM movie ";
 
 		try {
@@ -375,13 +382,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -390,13 +398,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -405,13 +414,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -420,13 +430,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -435,13 +446,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -450,13 +462,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -465,13 +478,14 @@ public class teamMovie {
 				System.out.println(sql);
 				rs = stmt.executeQuery(sql);
 
+				v.model.setNumRows(0);
+
 				while (rs.next()) {
-					m = new MovieModel(rs.getString("title"), rs.getString("director"), rs.getString("genre"),
-							rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
-							rs.getString("country"));
-					addTextArea();
+					v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"),
+							rs.getString("genre"), rs.getString("time"), rs.getString("actor"), rs.getString("rating"),
+							rs.getString("country") });
 				}
-				
+
 				search.setVisible(false);
 				break;
 
@@ -486,13 +500,16 @@ public class teamMovie {
 		makeConnection();
 		viewToModel();
 		try {
-			String s = "";
-			s = "INSERT INTO movie (title, director, genre, time, actor, rating, country) values ";
-			s += "('" + m.title + "', '" + m.director + "', '" + m.genre + "', '" + m.time + "', '" + m.actor + "', '"
-					+ m.rating + "', '" + m.country + "')";
-			System.out.println(s);
-			stmt.executeUpdate(s);
-			getMovie();
+			if (!v.ttf.getText().equals("")) {
+				String s = "";
+				s = "INSERT INTO movie (title, director, genre, time, actor, rating, country) values ";
+				s += "('" + m.title + "', '" + m.director + "', '" + m.genre + "', '" + m.time + "', '" + m.actor + "', '"
+						+ m.rating + "', '" + m.country + "')";
+				System.out.println(s);
+				stmt.executeUpdate(s);
+				v.model.setNumRows(0);
+				getMovie();
+			}
 		} catch (SQLException sqle) {
 			System.out.println(sqle.getMessage());
 		}
@@ -511,6 +528,7 @@ public class teamMovie {
 					+ "' WHERE title = '" + m.title + "'";
 			System.out.println(s);
 			stmt.executeUpdate(s);
+			v.model.setNumRows(0);
 			getMovie();
 		} catch (SQLException sqle) {
 			System.out.println("isExist : SQL Error");
@@ -530,6 +548,7 @@ public class teamMovie {
 			System.out.println(sql);
 			try {
 				stmt.executeUpdate(sql);
+				v.model.setNumRows(0);
 				getMovie();
 			} catch (SQLException sqle) {
 				System.out.println("isExist : DELETE SQL Error");
@@ -555,12 +574,6 @@ public class teamMovie {
 			e.getStackTrace();
 		}
 		return con;
-	}
-	
-	public void disableButtons() {
-		v.button[0].setEnabled(false);
-		v.button[1].setEnabled(false);
-		v.button[2].setEnabled(false);
 	}
 
 	public void disConnection() {
