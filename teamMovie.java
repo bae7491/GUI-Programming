@@ -43,17 +43,23 @@ class teamMovieView extends JFrame {
 	JComboBox<String> combT = new JComboBox<String>(); // 상영시간 Time
 	JComboBox<String> combR = new JComboBox<String>(); // 등급 Rating
 	JComboBox<String> combC = new JComboBox<String>(); // 나라 Country
-
 	JButton[] button = new JButton[5];
 
-	String colName[] = { "제목", "감독", "장르", "시간", "주언", "등급", "나라" };
-	DefaultTableModel model = new DefaultTableModel(colName, 0);
+	String colName[] = { "제목", "감독", "장르", "시간", "주연", "등급", "나라" };
+	DefaultTableModel model = new DefaultTableModel(colName, 0) {
+		private static final long serialVersionUID = 1L;
+
+		public boolean isCellEditable(int i, int c) {
+			return false;
+		}
+	};
+
 	JTable table = new JTable(model);
 	DefaultTableCellRenderer ca = new DefaultTableCellRenderer();
 
 	public teamMovieView() {
 
-		setTitle("영화 ");
+		setTitle("영화 관리 프로그램");
 		setSize(615, 350);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -67,7 +73,6 @@ class teamMovieView extends JFrame {
 	void newComponents() {
 
 		String[] lName = { "감독", "장르", "시간", "주연", "등급", "나라" }; // 라벨 배열.
-		String[] tName = { "", "", "" };
 		String[] combGName = { "전체", "액션", "코미디", "드라마", "멜로", "공포/스릴러", "SF/판타지", "애니메이션" }; // 장르 리스트 배열.
 		String[] combTName = { "전체", "1시간 이내", "1시간30분 이내", "2시간 이내", "2시간30분 이내" }; // 상영 시간 리스트 배열.
 		String[] combRName = { "전체", "12세 관람가", "15세 관람가", "19세 관람가" }; // 등급 리스트 배열.
@@ -77,13 +82,14 @@ class teamMovieView extends JFrame {
 
 		for (int i = 0; i < tf.length; i++) {
 			tf[i] = new JTextField(30);
+			tf[i].setText("");
 		}
 
 		for (int i = 0; i < bName.length; i++) {
 			button[i] = new JButton(bName[i]);
 		}
 
-		for (int i = 0; i < combRName.length - 1; i++) {
+		for (int i = 0; i < combRName.length; i++) {
 			combR.addItem(combRName[i]);
 		}
 
@@ -165,7 +171,7 @@ class teamMovieView extends JFrame {
 
 		table.setPreferredScrollableViewportSize(new Dimension(580, 133));
 		table.getTableHeader().setReorderingAllowed(false);
-		
+
 		table.getColumnModel().getColumn(0).setPreferredWidth(70);
 		table.getColumnModel().getColumn(1).setPreferredWidth(70);
 		table.getColumnModel().getColumn(2).setPreferredWidth(50);
@@ -207,7 +213,7 @@ class searchView extends JFrame {
 
 	Container c = getContentPane();
 	JPanel p1, p2;
-	JComboBox<String> combmovie;
+	JComboBox<String> combMovie;
 	String[] movie = { "제목", "감독", "장르", "시간", "주연", "등급", "나라" };
 	JTextField tf;
 	JButton btn[] = new JButton[2];
@@ -219,10 +225,10 @@ class searchView extends JFrame {
 		setSize(300, 100);
 
 		p1 = new JPanel(new FlowLayout()); // List와 검색어 TextField 추가.
-		combmovie = new JComboBox<String>(movie);
+		combMovie = new JComboBox<String>(movie);
 
-		combmovie.setToolTipText("검색하고 싶은 분류를 선택하세요.");
-		p1.add(combmovie);
+		combMovie.setToolTipText("검색하고 싶은 분류를 선택하세요.");
+		p1.add(combMovie);
 
 		tf = new JTextField(20);
 		tf.setToolTipText("검색하고 싶은 내용을 입력하세요.");
@@ -260,12 +266,14 @@ public class teamMovie {
 
 		for (int i = 0; i < v.tf.length; i++) {
 			v.tf[i].addActionListener(handler);
-			if (i < 3) {
-				v.button[i].addActionListener(handler);
-			}
 		}
-		v.button[3].addActionListener(handler);
-		v.button[4].addActionListener(handler);
+
+		for (int i = 0; i < v.button.length; i++) {
+			v.button[i].addActionListener(handler);
+		}
+
+		startButton();
+
 		v.table.addMouseListener(new MouseHandler());
 		v.addWindowListener(new WindowHandler());
 	}
@@ -274,6 +282,16 @@ public class teamMovie {
 		m = new MovieModel(v.ttf.getText(), v.tf[0].getText(), v.combG.getSelectedItem().toString(),
 				v.combT.getSelectedItem().toString(), v.tf[1].getText(), v.combR.getSelectedItem().toString(),
 				v.combC.getSelectedItem().toString());
+	}
+	
+	void resetField() {
+		v.ttf.setText("");
+		v.tf[0].setText("");
+		v.tf[1].setText("");
+		v.combG.setSelectedIndex(0);
+		v.combT.setSelectedIndex(0);
+		v.combR.setSelectedIndex(0);
+		v.combC.setSelectedIndex(0);
 	}
 
 	class MouseHandler extends MouseAdapter {
@@ -299,6 +317,10 @@ public class teamMovie {
 			v.combT.setSelectedItem(movieTime);
 			v.combR.setSelectedItem(movieRating);
 			v.combC.setSelectedItem(movieCountry);
+			
+			v.button[0].setEnabled(false);
+			v.button[1].setEnabled(true);
+			v.button[2].setEnabled(true);
 		}
 	}
 
@@ -308,33 +330,40 @@ public class teamMovie {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == v.ttf) {
 				v.tf[0].requestFocus();
-				for (int i = 0; i < 3; i++) {
-					v.button[i].setEnabled(true);
-				}
 			} else if (e.getSource() == v.tf[0]) {
 				v.tf[1].requestFocus();
 			} else if (e.getSource() == v.button[0]) { // 삽입.
-				addMovie();
+				if (v.ttf.getText().equals("") || v.tf[0].getText().equals("") || v.tf[1].getText().equals("")) {
+					JOptionPane.showMessageDialog(null, "빈 공간이 있습니다! 공간을 채워주세요!", "경고", JOptionPane.ERROR_MESSAGE);
+				} else {
+					addMovie();
+					resetField();
+				}
 			} else if (e.getSource() == v.button[1]) { // 수정.
 				updateMovie();
+				resetField();
 			} else if (e.getSource() == v.button[2]) { // 삭제.
 				deleteMovie();
+				resetField();
 			} else if (e.getSource() == v.button[3]) { // 초기화.
-				v.ttf.setText("");
-				v.tf[0].setText("");
-				v.tf[1].setText("");
+				resetField();
+
 				v.model.setNumRows(0);
-				v.combG.setSelectedIndex(0);
-				v.combT.setSelectedIndex(0);
-				v.combR.setSelectedIndex(0);
-				v.combC.setSelectedIndex(0);
+
+				v.button[0].setEnabled(true);
+				v.button[1].setEnabled(false);
+				v.button[2].setEnabled(false);
+
 				getMovie();
 			} else if (e.getSource() == v.button[4]) {
 				searchView();
+				resetField();
 			} else if (e.getSource() == search.btn[0]) {
 				searchMovie();
+				
 			} else if (e.getSource() == search.btn[1]) {
 				search.setVisible(false);
+				resetField();
 			}
 		}
 
@@ -358,6 +387,8 @@ public class teamMovie {
 				v.model.addRow(new Object[] { rs.getString("title"), rs.getString("director"), rs.getString("genre"),
 						rs.getString("time"), rs.getString("actor"), rs.getString("rating"), rs.getString("country") });
 			}
+
+			startButton();
 		} catch (SQLException sqle) {
 			System.out.println("getData: SQL Error");
 			disConnection();
@@ -376,7 +407,7 @@ public class teamMovie {
 		String sql = "SELECT * FROM movie ";
 
 		try {
-			switch (search.combmovie.getSelectedItem().toString()) {
+			switch (search.combMovie.getSelectedItem().toString()) {
 			case "제목":
 				sql += "WHERE title = '" + search.tf.getText() + "'";
 				System.out.println(sql);
@@ -503,12 +534,14 @@ public class teamMovie {
 			if (!v.ttf.getText().equals("")) {
 				String s = "";
 				s = "INSERT INTO movie (title, director, genre, time, actor, rating, country) values ";
-				s += "('" + m.title + "', '" + m.director + "', '" + m.genre + "', '" + m.time + "', '" + m.actor + "', '"
-						+ m.rating + "', '" + m.country + "')";
+				s += "('" + m.title + "', '" + m.director + "', '" + m.genre + "', '" + m.time + "', '" + m.actor
+						+ "', '" + m.rating + "', '" + m.country + "')";
 				System.out.println(s);
 				stmt.executeUpdate(s);
 				v.model.setNumRows(0);
 				getMovie();
+			} else {
+				System.out.println("삽입할 문장이 없습니다.");
 			}
 		} catch (SQLException sqle) {
 			System.out.println(sqle.getMessage());
@@ -584,6 +617,12 @@ public class teamMovie {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
+	}
+
+	public void startButton() {
+		v.button[0].setEnabled(true);
+		v.button[1].setEnabled(false);
+		v.button[2].setEnabled(false);
 	}
 
 	public static void main(String[] args) {
