@@ -387,8 +387,10 @@ public class teamMovie {
 			} else if (e.getSource() == v.tf[0]) { // 감독 TextField.
 				v.tf[1].requestFocus();
 			} else if (e.getSource() == v.button[0]) { // 삽입.
-				if (v.ttf.getText().equals("") || v.tf[0].getText().equals("") || v.tf[1].getText().equals("")) { // TextField의 내용들이 비어있는 값이라면,
-					JOptionPane.showMessageDialog(null, "빈 공간이 있습니다! 공간을 채워주세요!", "경고", JOptionPane.ERROR_MESSAGE); // 빈공간을 채워달라는 경고창 실행.
+				if (v.ttf.getText().equals("") || v.tf[0].getText().equals("") || v.tf[1].getText().equals("")) { 
+					// TextField의 내용들이 비어있는 값이라면,
+					JOptionPane.showMessageDialog(null, "빈 공간이 있습니다! 공간을 채워주세요!", "경고", JOptionPane.ERROR_MESSAGE); 
+					// 빈공간을 채워달라는 경고창 실행.
 				} else { // 모두 채워졌다면,
 					addMovie(); // DB에 삽입하고, Table에 출력.
 					resetField(); // TextField, ComboBox 값을 초기 상태로 돌림.
@@ -658,7 +660,8 @@ public class teamMovie {
 	// Table에서 선택된 행의 영화 데이터를 삭제해 Table에 출력하는 메소드.
 	public void deleteMovie() {
 		viewToModel(); // 입력받은 데이터의 값을 가져오는 메소드.
-		int isDelete = JOptionPane.showConfirmDialog(null, "삭제하시겠습니까?", null, JOptionPane.YES_NO_OPTION); // 삭제 Button 클릭 시, 삭제 경고 창 실행.
+		int isDelete = JOptionPane.showConfirmDialog(null, "삭제하시겠습니까?", null, JOptionPane.YES_NO_OPTION); 
+		// 삭제 Button 클릭 시, 삭제 경고 창 실행.
 		System.out.println("DELETE : " + isDelete);
 
 		if (isDelete == JOptionPane.YES_OPTION) { // YES_OPTION 선택 시,
