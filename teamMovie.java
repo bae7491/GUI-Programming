@@ -220,7 +220,7 @@ class teamMovieView extends JFrame {
 		ca.setHorizontalAlignment(SwingConstants.CENTER); 
 
 		// 정렬할 테이블의 컬럼모델을 가져옴
-		TableColumnModel tcm = table.getColumnModel(); 
+		TableColumnModel tcm = table.getColumnModel();
 
 		// 모든 열에 ca 설정을 추가.
 		tcm.getColumn(0).setCellRenderer(ca);
