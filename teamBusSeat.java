@@ -22,7 +22,7 @@ class LoginView extends JFrame {
 	JLabel[] la = new JLabel[2]; // 아이디, 비밀번호 Label.
 	JTextField[] tf = new JTextField[2]; // 아이디, 비밀번호 TextField.
 	JButton[] btn = new JButton[2]; // 로그인, 회원가입 Button.
-	static String id = "";
+	static String id = ""; // 다른 Frame에서도 사용할 사용자의 ID 정보를 저장.
 
 	LoginView() { // 로그인 창 생성자.
 		setTitle("버스 좌석 예매");
@@ -128,7 +128,7 @@ class LoginView extends JFrame {
 			t.rs = t.stmt.executeQuery(sql);
 
 			if (t.rs.isBeforeFirst() == false) {
-				JOptionPane.showMessageDialog(null, "로그인에 실패했습니다!\n값을 제대로 입력해주세요!", "로그인 오류",
+				JOptionPane.showMessageDialog(null, "아이디를 잘못 입력했습니다!\n값을 제대로 입력해주세요!", "로그인 오류",
 						JOptionPane.ERROR_MESSAGE); // 로그인 실패 창 출력.
 			} else {
 				while (t.rs.next()) {
@@ -140,7 +140,7 @@ class LoginView extends JFrame {
 
 						setVisible(false);
 					} else { // 비밀번호가 틀리다면,
-						JOptionPane.showMessageDialog(null, "아이디 혹은 비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요.", "로그인 오류",
+						JOptionPane.showMessageDialog(null, "비밀번호를 잘못 입력했습니다!\n입력하신 내용을 다시 확인해주세요.", "로그인 오류",
 								JOptionPane.ERROR_MESSAGE); // 로그인 실패 창 출력.
 					}
 				}
@@ -323,7 +323,7 @@ class SignUpView extends JFrame {
 			System.out.println(sql);
 			t.rs = t.stmt.executeQuery(sql);
 
-			if (t.rs.isBeforeFirst() == false && !tf[0].getText().equals("")) { // 가장 처음의 데이터가 false (없다면), 공백이 없다면,
+			if (t.rs.isBeforeFirst() == false && !tf[0].getText().equals("")) { // 가장 처음의 데이터(ID)가 false (없다면), 공백이 없다면,
 				JOptionPane.showMessageDialog(null, "사용가능한 ID입니다!", "ID 중복 체크", JOptionPane.PLAIN_MESSAGE); // 중복 체크 통과.
 
 				// TextField, RadioButton, ComboBox 수정 가능하게 바꿈.
@@ -605,7 +605,6 @@ class FirstUserBusView extends JFrame { // 유저 로그인 성공 시 나올 �
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == button[0]) { // 조회버튼 클릭 시,
 					busSearch();
-					resetField();
 				} else if (e.getSource() == button[1]) { // 예매하기 버튼 클릭 시,
 					new ReCheckPanel();
 				} else if (e.getSource() == button[2]) { // 초기화 버튼 클릭 시,
@@ -932,6 +931,7 @@ class FirstUserBusView extends JFrame { // 유저 로그인 성공 시 나올 �
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == rescBtn) { // 예매 취소 버튼을 누르면,
 					cancelDB();
+					rescBtn.setEnabled(false);
 				}
 
 				if (e.getSource() == checkBtn) { // 예매 확인 버튼을 누르면,
@@ -1060,7 +1060,7 @@ class FirstUserBusView extends JFrame { // 유저 로그인 성공 시 나올 �
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == logoutBtn) { // 로그아웃 Button이 눌러지면,
-					int isCancel = JOptionPane.showConfirmDialog(null, "로그아웃 하시겠습니까?", "Confirm",
+					int isCancel = JOptionPane.showConfirmDialog(null, "로그아웃 하시겠습니까?", "로그아웃",
 							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE); // 로그아웃 경고 창.
 
 					if (isCancel == JOptionPane.YES_OPTION) { // 로그아웃에 '네' Button 클릭 시,
@@ -1130,7 +1130,7 @@ class FirstAdminBusView extends JFrame { // 관리자 로그인 성공 시 나�
 		ArrayList<String> busLists = new ArrayList<>();
 
 		// 버스 정보테이블 기본 설정
-		String busColName[] = { "차량 번호", "버스 번호", "출발지", "도착지", "소요시간", "등급", "좌석수", "잔여석", "날짜", "출발시간" }; // 버스 관리창 테이블 열 이름 배열
+		String busColName[] = { "차량 번호", "버스 번호", "출발지", "도착지", "소요시간", "등급", "잔여석", "좌석수", "날짜", "출발시간" }; // 버스 관리창 테이블 열 이름 배열
 
 		DefaultTableModel busModel = new DefaultTableModel(busColName, 0) {
 			private static final long serialVersionUID = 1L;
@@ -1542,7 +1542,7 @@ class FirstAdminBusView extends JFrame { // 관리자 로그인 성공 시 나�
 							while (t.rs.next()) {
 								busModel.addRow(new Object[] { t.rs.getString("busID"), t.rs.getString("busN"),
 										t.rs.getString("start"), t.rs.getString("finish"), t.rs.getString("retime"),
-										t.rs.getString("rating"), t.rs.getString("seatn"), t.rs.getString("seatR"),
+										t.rs.getString("rating"), t.rs.getString("seatR"), t.rs.getString("seatn"), 
 										t.rs.getString("date"), t.rs.getString("startT"), });
 								busLists.add(t.rs.getString("busN"));
 							}
@@ -1569,7 +1569,7 @@ class FirstAdminBusView extends JFrame { // 관리자 로그인 성공 시 나�
 							while (t.rs.next()) {
 								busModel.addRow(new Object[] { t.rs.getString("busID"), t.rs.getString("busN"),
 										t.rs.getString("start"), t.rs.getString("finish"), t.rs.getString("retime"),
-										t.rs.getString("rating"), t.rs.getString("seatn"), t.rs.getString("seatR"),
+										t.rs.getString("rating"), t.rs.getString("seatR"),  t.rs.getString("seatn"),
 										t.rs.getString("date"), t.rs.getString("startT"), });
 							}
 						}
@@ -1764,7 +1764,7 @@ class FirstAdminBusView extends JFrame { // 관리자 로그인 성공 시 나�
 		String userPhone;
 
 		// 고객 정보 테이블 기본 설정
-		String userColName[] = { "ID", "PW", "생년월일", "이름", "성별", "전화번호" };
+		String userColName[] = { "ID", "PW", "이름", "생년월일", "성별", "전화번호" };
 		DefaultTableModel userModel = new DefaultTableModel(userColName, 0) {
 			private static final long serialVersionUID = 1L;
 
@@ -2019,9 +2019,9 @@ class FirstAdminBusView extends JFrame { // 관리자 로그인 성공 시 나�
 			String sql = "";
 
 			try {
-				sql = "UPDATE member set MID = '" + tf[0].getText() + "', PW = '" + tf[1].getText() + "', name = '"
+				sql = "UPDATE member set PW = '" + tf[1].getText() + "', name = '"
 						+ tf[2].getText() + "', birth = '" + tf[3].getText() + "', gender = '" + tf[4].getText()
-						+ "', phone = '" + tf[5].getText() + "'";
+						+ "', phone = '" + tf[5].getText() + "' WHERE MID = '" + tf[0].getText() + "'";
 				System.out.println(sql);
 				t.stmt.executeUpdate(sql);
 
@@ -2336,7 +2336,7 @@ class FirstAdminBusView extends JFrame { // 관리자 로그인 성공 시 나�
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == logoutBtn) { // 로그아웃 Button 클릭 시,
-					int isCancel = JOptionPane.showConfirmDialog(null, "로그아웃 하시겠습니까?", "Confirm",
+					int isCancel = JOptionPane.showConfirmDialog(null, "로그아웃 하시겠습니까?", "로그아웃",
 							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE); // 로그아웃 경고창 실행.
 
 					if (isCancel == JOptionPane.YES_OPTION) { // 로그아웃 경고창에서 YES 클릭시,
